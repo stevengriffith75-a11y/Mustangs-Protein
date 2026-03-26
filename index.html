@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mustangs Protein">
+<meta name="theme-color" content="#1a3a8f">
+<title>Mustangs Protein Check-Off</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&display=swap');
+
+  :root {
+    --blue: #1a3a8f;
+    --blue-dark: #122a6e;
+    --blue-light: #e8edf8;
+    --white: #ffffff;
+    --gray: #f4f5f7;
+    --border: #dde1ea;
+    --text: #1a1f2e;
+    --muted: #6b7280;
+    --checked-bg: #1a3a8f;
+    --checked-text: #ffffff;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--gray);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--blue);
+    color: var(--white);
+    padding: 48px 16px 14px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--white);
+  }
+  .header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .header-sub {
+    font-size: 12px;
+    opacity: .75;
+    margin-top: 2px;
+  }
+
+  /* DAY TABS */
+  .day-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px 12px 6px;
+    overflow-x: auto;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .day-tabs::-webkit-scrollbar { display: none; }
+  .day-tab {
+    flex-shrink: 0;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .day-tab.active {
+    background: var(--blue);
+    color: var(--white);
+    border-color: var(--blue);
+  }
+  .day-tab.today-marker {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
+
+  /* STATS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 10px 12px 6px;
+    background: var(--white);
+  }
+  .stat {
+    background: var(--gray);
+    border-radius: var(--radius);
+    padding: 8px 6px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--blue);
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    background: var(--white);
+    padding: 6px 12px 10px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 3px;
+    transition: width .3s ease;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    position: sticky;
+    top: 95px;
+    z-index: 99;
+  }
+  .search-wrap {
+    flex: 1;
+    position: relative;
+  }
+  .search-wrap input {
+    width: 100%;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    padding: 8px 32px 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--gray);
+    color: var(--text);
+    outline: none;
+  }
+  .search-wrap input:focus { border-color: var(--blue); background: var(--white); }
+  .clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1;
+    display: none;
+  }
+  .grade-select {
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--gray);
+    color: var(--text);
+    outline: none;
+    min-width: 110px;
+  }
+
+  /* NAME GRID */
+  .grade-section { padding: 0 12px; }
+  .grade-heading {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--blue);
+    padding: 12px 0 6px;
+    border-bottom: 1.5px solid var(--blue-light);
+    margin-bottom: 8px;
+  }
+  .name-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .name-btn {
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 32px 10px 12px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+    line-height: 1.3;
+    transition: transform .1s, background .15s, border-color .15s;
+    -webkit-user-select: none;
+  }
+  .name-btn:active { transform: scale(0.96); }
+  .name-btn.checked {
+    background: var(--blue);
+    color: var(--white);
+    border-color: var(--blue);
+  }
+  .name-btn .check-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--white);
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .name-btn.checked .check-icon { opacity: 1; }
+
+  /* UNDO BAR */
+  .undo-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 200;
+  }
+  .undo-msg { font-size: 13px; color: var(--muted); }
+  .undo-btn {
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--blue);
+    background: var(--blue-light);
+    border: none;
+    border-radius: var(--radius);
+    padding: 6px 14px;
+    cursor: pointer;
+    display: none;
+  }
+
+  .scroll-body { padding-bottom: 70px; }
+  .empty-msg { padding: 32px 12px; text-align: center; color: var(--muted); font-size: 14px; }
+
+  /* INSTALL BANNER */
+  .install-banner {
+    background: var(--blue-light);
+    border: 1.5px solid var(--blue);
+    border-radius: var(--radius);
+    margin: 10px 12px 0;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--blue-dark);
+    display: none;
+  }
+  .install-banner strong { display: block; font-weight: 600; margin-bottom: 2px; }
+  .install-banner .dismiss {
+    float: right;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--blue);
+    margin-top: -2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">🐴 Friendswood Mustangs Football</div>
+  <div class="header-sub">Protein Check-Off &nbsp;·&nbsp; <span id="weekLabel"></span></div>
+</div>
+
+<div class="day-tabs" id="dayTabs"></div>
+
+<div style="background:var(--white)">
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="checkedCount">0</div><div class="stat-lbl">Got protein</div></div>
+    <div class="stat"><div class="stat-num" id="remainCount">0</div><div class="stat-lbl">Remaining</div></div>
+    <div class="stat"><div class="stat-num" id="pctCount">0%</div><div class="stat-lbl">Complete</div></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="search" id="searchBox" placeholder="Search player..." oninput="filterNames()" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="clear-btn" id="clearBtn" onclick="clearSearch()">✕</button>
+  </div>
+  <select class="grade-select" id="gradeFilter" onchange="filterNames()">
+    <option value="all">All grades</option>
+    <option value="9">9th Grade</option>
+    <option value="10">10th Grade</option>
+    <option value="11">11th Grade</option>
+  </select>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <button class="dismiss" onclick="document.getElementById('installBanner').style.display='none'">✕</button>
+  <strong>Add to Home Screen</strong>
+  Tap the share button <strong>⎋</strong> then "Add to Home Screen" to use this as an app.
+</div>
+
+<div class="scroll-body" id="rosterBody"></div>
+
+<div class="undo-bar">
+  <span class="undo-msg" id="undoMsg">Tap a name to check them off</span>
+  <button class="undo-btn" id="undoBtn" onclick="undo()">↩ Undo</button>
+</div>
+
+<script>
+const ROSTER = [
+  {grade:9,name:'Ambeau, Kade J.'},{grade:9,name:'Angelica, Jake F.'},{grade:9,name:'Bailey, Sophia R.'},
+  {grade:9,name:'Barfield, Griffin R.'},{grade:9,name:'Barrett-Hill, Anastasia G.'},{grade:9,name:'Barta, Tristin A.'},
+  {grade:9,name:'Bennett, Weldon A.'},{grade:9,name:'Boyer, Gram B.'},{grade:9,name:'Brinkmann, John H.'},
+  {grade:9,name:'Bynum, Mia E.'},{grade:9,name:'Chandler, Liam J.'},{grade:9,name:'Clark, Andrew R.'},
+  {grade:9,name:'Collins, Christopher L.'},{grade:9,name:'Crawford, Zak A.'},{grade:9,name:'Crew, Jackson P.'},
+  {grade:9,name:'Dixon, Tate M.'},{grade:9,name:'Ellis, Carter M.'},{grade:9,name:'Esmaeillou, Darian'},
+  {grade:9,name:'Farmer, Xander'},{grade:9,name:'Frederick, Austin L.'},{grade:9,name:'Freeman, Parker A.'},
+  {grade:9,name:'Garcia, Aaron J.'},{grade:9,name:'Garcia, Dane M.'},{grade:9,name:'Garza, James R.'},
+  {grade:9,name:'Gatlin, Kayden L.'},{grade:9,name:'Geraci, Grayson J.'},{grade:9,name:'Griffith, Grant L.'},
+  {grade:9,name:'Guerrero, Tristin T.'},{grade:9,name:'Hornberger, Holt A.'},{grade:9,name:'Howarth, Gary M. Jr.'},
+  {grade:9,name:'Howe, Peyton M.'},{grade:9,name:'Johnson, Dexter V.'},{grade:9,name:'Karacostas, Carter M.'},
+  {grade:9,name:'Kick, Katia C.'},{grade:9,name:'Kinchen, Jett T.'},{grade:9,name:'Kirkpatrick, Carter L.'},
+  {grade:9,name:'Kovacevich, Grayson M.'},{grade:9,name:'Lara, Alfred J. IV'},{grade:9,name:'Lea, Jonah E.'},
+  {grade:9,name:'Mann, Benaiah A.'},{grade:9,name:'Martin, Dylan F.'},{grade:9,name:'McKnight, Peyton E.'},
+  {grade:9,name:'Miller, Charles R.'},{grade:9,name:'Nunley, Jaxson B.'},{grade:9,name:'Onaha Ramirez, Shawn H.'},
+  {grade:9,name:'Pham, Carter D.'},{grade:9,name:'Pinales, Vyncent I.'},{grade:9,name:'Powers, Carter J.'},
+  {grade:9,name:'Provenzano, Gavin L.'},{grade:9,name:'Putnum, Cannon C.'},{grade:9,name:'Rabon, Graham M.'},
+  {grade:9,name:'Richards, Michael A.'},{grade:9,name:'Robertson, Wyatt J.'},{grade:9,name:'Ruiz, Orlando Jr.'},
+  {grade:9,name:'Sanders, Owen W.'},{grade:9,name:'Stallings, William E. V'},{grade:9,name:'Stephens, Jameson B.'},
+  {grade:9,name:'Swaty, Ava L.'},{grade:9,name:'Trinh, Andrew-Huy H.'},{grade:9,name:'Umansor, David X.'},
+  {grade:9,name:'Urban, Clyde H.'},{grade:9,name:'Valicek, Jacob R.'},{grade:9,name:'Vu, Karter A.'},
+  {grade:9,name:'Watkins, Blake M.'},{grade:9,name:'Watkins, Luke A.'},{grade:9,name:'Weil, Cole F.'},
+  {grade:9,name:'Wells, Braylon A.'},{grade:9,name:'Wells, Haydon D.'},{grade:9,name:'Willa, Joseph P.'},
+  {grade:9,name:'Wilson, Hayden K.'},{grade:9,name:'Wise, Hobie W.'},{grade:9,name:'Wochner, Brayden C.'},
+  {grade:9,name:'Worthey, Zayden J.'},{grade:9,name:'Yohn, Jeffery T.'},
+  {grade:10,name:'Abay, William A.'},{grade:10,name:'Bazan, Marcus'},{grade:10,name:'Branom, Peter M.'},
+  {grade:10,name:'Bray, Oliver L.'},{grade:10,name:'Burkett, Aiden J.'},{grade:10,name:'Casiano, Andrew I.'},
+  {grade:10,name:'Conrad, Austin L.'},{grade:10,name:'Ford, Alan E.'},{grade:10,name:'Fuentes, Austin L.'},
+  {grade:10,name:'Groller, James W.'},{grade:10,name:'Hutchins, Cannon R.'},{grade:10,name:'Lindsey, George J. III'},
+  {grade:10,name:'Malhotra, Veer P.'},{grade:10,name:'Manetakis, Vincent A.'},{grade:10,name:'Medina, Tyler A.'},
+  {grade:10,name:'Moore, Charlie W.'},{grade:10,name:'Orlando, Ronald C.'},{grade:10,name:'Quezada, Sebastian C.'},
+  {grade:10,name:'Ramos, Jeremiah N.'},{grade:10,name:'Roher, Stuart N.'},{grade:10,name:'Roll, Jack M.'},
+  {grade:10,name:'Salinas, Jeidan A.'},{grade:10,name:'Schwanke, Arthur M.'},{grade:10,name:'Schwartz, Aiden J.'},
+  {grade:10,name:'Stahl, Mason J.'},{grade:10,name:'Stephens, Judson B.'},{grade:10,name:'Stevens, William J.'},
+  {grade:10,name:'Svanda, Lucas A.'},{grade:10,name:'Urban, Finn J.'},{grade:10,name:'Villamin, Vincent M.'},
+  {grade:10,name:'Villarreal, Anthony E.'},{grade:10,name:'Vinciguerra, Aldante D.'},{grade:10,name:'Visintainer, Dylan S.'},
+  {grade:10,name:'Wagoner, Rhett L.'},{grade:10,name:'Zeagler, Jackson B.'},
+  {grade:11,name:'Adame, Bruce A.'},{grade:11,name:'Bateman, James C. III'},{grade:11,name:'Benton, King James L.'},
+  {grade:11,name:'Berry, Dax J.'},{grade:11,name:'Bonner, Carson S.'},{grade:11,name:'Bradshaw, Adrik A.'},
+  {grade:11,name:'Bradshaw, Dominic J.'},{grade:11,name:'Brister, Joshua T.'},{grade:11,name:'Buck, Dylan J.'},
+  {grade:11,name:'Butler, James R.'},{grade:11,name:'Cain, Joseph A.'},{grade:11,name:'Campbell, Joseph W.'},
+  {grade:11,name:'Cherian, Aiden'},{grade:11,name:'Clegg, John N.'},{grade:11,name:'Hoelscher, Mason W.'},
+  {grade:11,name:'Hogue, Von T.'},{grade:11,name:'Kemp, Carson T.'},{grade:11,name:'Khan, Shayaan A.'},
+  {grade:11,name:'Levine, John L.'},{grade:11,name:'Lowder, Brandon N.'},{grade:11,name:'Martin, Grant M.'},
+  {grade:11,name:'Monson, Colt T.'},{grade:11,name:'Parker, Antwon'},{grade:11,name:'Parks, Brady J.'},
+  {grade:11,name:'Pasqualli, Enzo P.'},{grade:11,name:'Powers, Braden J.'},{grade:11,name:'Rink, Maximilian F.'},
+  {grade:11,name:'Staats, Nolan P.'},{grade:11,name:'Sutton, Levi M.'},{grade:11,name:'Yawn, Jake M.'},
+];
+
+function getWeekDays() {
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  return ['Mon','Tue','Wed','Thu','Fri'].map((n, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return { label: n + ' ' + (d.getMonth()+1) + '/' + d.getDate(), key: 'day'+i, date: d };
+  });
+}
+
+function getWeekLabel(days) {
+  const f = days[0].date, l = days[4].date;
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return f.getMonth()===l.getMonth()
+    ? 'Week of '+mo[f.getMonth()]+' '+f.getDate()+' – '+l.getDate()+', '+l.getFullYear()
+    : 'Week of '+mo[f.getMonth()]+' '+f.getDate()+' – '+mo[l.getMonth()]+' '+l.getDate()+', '+l.getFullYear();
+}
+
+const DAYS = getWeekDays();
+const todayStr = new Date().toDateString();
+const todayIdx = DAYS.findIndex(d => d.date.toDateString() === todayStr);
+
+document.getElementById('weekLabel').textContent = getWeekLabel(DAYS);
+
+let activeDay = todayIdx >= 0 ? DAYS[todayIdx].key : DAYS[0].key;
+const checked = {};
+DAYS.forEach(d => { checked[d.key] = new Set(); });
+let lastAction = null;
+
+function buildDayTabs() {
+  const tabs = document.getElementById('dayTabs');
+  tabs.innerHTML = '';
+  DAYS.forEach((d, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-tab' + (d.key === activeDay ? ' active' : (i === todayIdx ? ' today-marker' : ''));
+    btn.textContent = d.label + (i === todayIdx ? ' ●' : '');
+    btn.onclick = () => { activeDay = d.key; buildDayTabs(); renderRoster(); updateStats(); };
+    tabs.appendChild(btn);
+  });
+}
+
+function renderRoster() {
+  const body = document.getElementById('rosterBody');
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const gradeFilter = document.getElementById('gradeFilter').value;
+  body.innerHTML = '';
+
+  const grades = gradeFilter === 'all' ? [9,10,11] : [parseInt(gradeFilter)];
+  let anyVisible = false;
+
+  grades.forEach(g => {
+    const players = ROSTER.map((p,i) => ({...p,idx:i}))
+      .filter(p => p.grade === g && (!q || p.name.toLowerCase().includes(q)));
+    if(!players.length) return;
+    anyVisible = true;
+
+    const section = document.createElement('div');
+    section.className = 'grade-section';
+
+    const heading = document.createElement('div');
+    heading.className = 'grade-heading';
+    heading.textContent = g + 'th Grade — ' + players.length + ' players';
+    section.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'name-grid';
+
+    players.forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = 'name-btn' + (checked[activeDay].has(p.idx) ? ' checked' : '');
+      btn.innerHTML = p.name + '<span class="check-icon">✓</span>';
+      btn.onclick = () => toggleCheck(p.idx, btn, p.name);
+      grid.appendChild(btn);
+    });
+
+    section.appendChild(grid);
+    body.appendChild(section);
+  });
+
+  if(!anyVisible) {
+    const msg = document.createElement('div');
+    msg.className = 'empty-msg';
+    msg.textContent = 'No players found';
+    body.appendChild(msg);
+  }
+}
+
+function toggleCheck(idx, btn, name) {
+  const s = checked[activeDay];
+  if(s.has(idx)) {
+    s.delete(idx); btn.classList.remove('checked');
+    lastAction = {type:'uncheck',idx,name}; showUndo(name + ' unchecked');
+  } else {
+    s.add(idx); btn.classList.add('checked');
+    lastAction = {type:'check',idx,name}; showUndo(name + ' ✓ got protein!');
+  }
+  updateStats();
+}
+
+function updateStats() {
+  const total = ROSTER.length, done = checked[activeDay].size;
+  document.getElementById('checkedCount').textContent = done;
+  document.getElementById('remainCount').textContent = total - done;
+  document.getElementById('pctCount').textContent = Math.round(done/total*100) + '%';
+  document.getElementById('progressFill').style.width = Math.round(done/total*100) + '%';
+}
+
+function showUndo(msg) {
+  document.getElementById('undoMsg').textContent = msg;
+  document.getElementById('undoBtn').style.display = 'block';
+  clearTimeout(window._ut);
+  window._ut = setTimeout(() => { document.getElementById('undoBtn').style.display='none'; lastAction=null; }, 6000);
+}
+
+function undo() {
+  if(!lastAction) return;
+  const {type,idx} = lastAction;
+  if(type==='check') checked[activeDay].delete(idx); else checked[activeDay].add(idx);
+  lastAction = null;
+  document.getElementById('undoBtn').style.display = 'none';
+  document.getElementById('undoMsg').textContent = 'Tap a name to check them off';
+  renderRoster(); updateStats();
+}
+
+function filterNames() {
+  const q = document.getElementById('searchBox').value;
+  document.getElementById('clearBtn').style.display = q ? 'block' : 'none';
+  renderRoster();
+}
+
+function clearSearch() {
+  document.getElementById('searchBox').value = '';
+  document.getElementById('clearBtn').style.display = 'none';
+  renderRoster();
+}
+
+// Show install banner on iOS Safari
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isInStandalone = window.navigator.standalone;
+if(isIos && !isInStandalone) {
+  document.getElementById('installBanner').style.display = 'block';
+}
+
+buildDayTabs();
+renderRoster();
+updateStats();
+</script>
+</body>
+</html>
